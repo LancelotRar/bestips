@@ -1,4 +1,4 @@
-# best-cf-ips
+# best-cf-ipv4
 
 1. 自动采集Cloudflare优选IP，每小时更新。  
 2. 多个公开IP池聚合&去重&**加地理标注**。  
