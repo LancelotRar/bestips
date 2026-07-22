@@ -21,7 +21,7 @@ jobs:
       - run: pip install requests
 
       - name: 采集IP
-        run: python workflow/collects.py
+        run: python workflow/bestip-collector.py
 
       - name: 提交更新
         run: |
