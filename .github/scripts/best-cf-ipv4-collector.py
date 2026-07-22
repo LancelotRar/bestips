@@ -20,7 +20,7 @@ SOURCES: dict[str, str] = {
     'https://bestcf.pages.dev/gslege/DE.txt': 'Gslege-DE',
     'https://bestcf.pages.dev/gslege/US.txt': 'Gslege-US',                 
     'https://ipdb.api.030101.xyz/?type=bestcf': 'IPDB',
-    'https://vps789.com/openApi/cfIpApi': 'VPS',
+    'https://vps789.com/openApi/cfIpApi': 'VPS789',
 }
 
 PORT: str = '443'
