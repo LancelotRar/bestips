@@ -79,8 +79,8 @@ def query_location(session: requests.Session, ip: str) -> str:
 
 
 def beijing_timestamp() -> str:
-    """Return current Beijing time as YYYYMMDD_HH:MM string."""
-    return (datetime.now(timezone.utc) + timedelta(hours=8)).strftime('%Y%m%d_%H:%M')
+    """Return current Beijing time as YYYY-MM-DD HH:MM string."""
+    return (datetime.now(timezone.utc) + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
 
 
 def collect_ips(session: requests.Session) -> set[str]:
@@ -126,7 +126,7 @@ def main() -> int:
     tmp = OUTPUT_FILE.with_suffix('.tmp')
     timestamp = beijing_timestamp()
     with tmp.open('w') as f:
-        f.write(f'ipv4.list.updated.at#Upd{timestamp}\n')
+        f.write(f'bestips updated at#{timestamp}\n')
         for ip_port, location in entries.items():
             f.write(f'{ip_port}#{location}\n')
     tmp.replace(OUTPUT_FILE)
