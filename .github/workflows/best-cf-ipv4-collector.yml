@@ -28,13 +28,13 @@ jobs:
         run: pip install -r .github/scripts/requirements.txt
 
       - name: Collect BestIPs
-        run: python3 .github/scripts/bestip-collector.py
+        run: python3 .github/scripts/best-cf-ipv4-collector.py
 
       - name: Commit update
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add bestips-ipv4.txt
+          git add best-cf-ipv4.txt
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "Update BestIPs list $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
           git pull --rebase

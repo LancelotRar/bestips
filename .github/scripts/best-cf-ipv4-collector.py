@@ -27,7 +27,7 @@ PORT: str = '443'
 HEADERS: dict[str, str] = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0'}
 IPV4_PATTERN: str = r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'
 LOCATION_URL: str = 'https://ipinfo.io/{ip}/country'
-OUTPUT_FILE: Path = Path('bestips-ipv4.txt')
+OUTPUT_FILE: Path = Path('best-cf-ipv4.txt')
 MAX_RETRIES: int = 3
 RETRY_DELAY: float = 2.0
 
