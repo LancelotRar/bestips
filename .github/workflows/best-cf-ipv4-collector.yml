@@ -1,4 +1,4 @@
-name: Collect BestIPs
+name: Collect Best CF IPV4
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: Collect BestIPs
+  group: Collect Best CF IPV4
   cancel-in-progress: false
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r .github/scripts/requirements.txt
 
-      - name: Collect BestIPs
+      - name: Collect Best CF IPV4
         run: python3 .github/scripts/best-cf-ipv4-collector.py
 
       - name: Commit update
@@ -36,6 +36,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add best-cf-ipv4.txt
           git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "Update BestIPs list $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
+          git commit -m "Update Best CF IPV4 list $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
           git pull --rebase
           git push
