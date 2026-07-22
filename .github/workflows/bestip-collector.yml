@@ -1,4 +1,4 @@
-name: 采集CF优选IP
+name: Collect Cloudflare IPs
 
 on:
   schedule:
@@ -20,13 +20,13 @@ jobs:
 
       - run: pip install requests
 
-      - name: 采集IP
+      - name: Collect IPs
         run: python workflow/bestip-collector.py
 
-      - name: 提交更新
+      - name: Commit update
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add ipv4.txt
-          git diff --staged --quiet || git commit -m "更新CF优选IP列表 $(date '+%Y-%m-%d %H:%M')"
+          git diff --staged --quiet || git commit -m "Update Cloudflare IP list $(date '+%Y-%m-%d %H:%M')"
           git push

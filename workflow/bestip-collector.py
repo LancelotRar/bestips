@@ -93,9 +93,9 @@ def collect_ips(session: requests.Session) -> set[str]:
             text = fetch(session, url)
             ips = extract_ipv4(text)
             all_ips.update(ips)
-            print(f'  [{name}] {len(ips)} 个IPv4')
+            print(f'  [{name}] {len(ips)} IPv4')
         except requests.RequestException as e:
-            print(f'  [{name}] 请求失败: {e}')
+            print(f'  [{name}] failed: {e}')
     return all_ips
 
 
@@ -111,18 +111,18 @@ def enrich_locations(session: requests.Session, ips: set[str]) -> dict[str, str]
 
 
 def main() -> int:
-    """Collect CF优选IPv4, query locations, and write result file."""
-    print('采集 CF 优选 IPv4...\n')
+    """Collect Cloudflare IPs, query locations, and write result file."""
+    print('Collecting Cloudflare IPs...\n')
 
     session = _session()
 
     all_ips = collect_ips(session)
     if not all_ips:
-        print('未采集到任何IP，跳过')
+        print('No IPs collected, skip')
         return 1
-    print(f'\n去重后共 {len(all_ips)} 个IPv4')
+    print(f'\n{len(all_ips)} unique IPv4')
 
-    print('查询地理位置...')
+    print('Querying locations...')
     entries = enrich_locations(session, all_ips)
 
     tmp = OUTPUT_FILE.with_suffix('.tmp')
@@ -132,7 +132,7 @@ def main() -> int:
         for ip_port, location in entries.items():
             f.write(f'{ip_port}#{location}\n')
     tmp.replace(OUTPUT_FILE)
-    print(f'\n共 {len(entries)} 个IP写入 {OUTPUT_FILE}')
+    print(f'\n{len(entries)} IPs written to {OUTPUT_FILE}')
     return 0
 
 
