@@ -15,12 +15,13 @@ SOURCES: dict[str, str] = {
     'https://api.uouin.com/cloudflare.html': 'UOUIN',
     'https://bestcf.pages.dev/xinyitang3/ipv4.txt': 'Mia',
     'https://stock.hostmonit.com/CloudFlareYes': 'CFYES',
-    'https://bestcf.pages.dev/tiancheng/all.txt': 'Tiancheng', 
+    'https://bestcf.pages.dev/tiancheng/all.txt': 'Tiancheng',
     'https://raw.githubusercontent.com/gslege/CloudflareIP/refs/heads/main/SG.txt': 'Gslege-SG', 
     'https://raw.githubusercontent.com/gslege/CloudflareIP/refs/heads/main/DE.txt': 'Gslege-DE',
     'https://raw.githubusercontent.com/gslege/CloudflareIP/refs/heads/main/US.txt': 'Gslege-US',                 
     'https://raw.githubusercontent.com/ymyuuu/IPDB/refs/heads/main/BestCF/bestcfv4.txt': 'IPDB',
     'https://vps789.com/openApi/cfIpApi': 'VPS789',
+    'https://api.4ce.cn/api/bestCFIP': 'vvhan',
 }
 
 PORT: str = '443'
@@ -29,7 +30,7 @@ IPV4_PATTERN: str = r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'
 LOCATION_URL: str = 'https://ipinfo.io/{ip}/country'
 OUTPUT_FILE: Path = Path('best-cf-ipv4.txt')
 MAX_RETRIES: int = 3
-RETRY_DELAY: float = 2.0
+RETRY_BACKOFF_FACTOR: float = 2.0
 
 
 def _session() -> requests.Session:
@@ -39,7 +40,7 @@ def _session() -> requests.Session:
     adapter = HTTPAdapter(
         max_retries=Retry(
             total=MAX_RETRIES,
-            backoff_factor=RETRY_DELAY,
+            backoff_factor=RETRY_BACKOFF_FACTOR,
             allowed_methods={'GET'},
             status_forcelist={429, 500, 502, 503, 504},
         )
@@ -62,8 +63,7 @@ def extract_ipv4(text: str) -> set[str]:
     for match in re.finditer(IPV4_PATTERN, text):
         try:
             ip = ipaddress.ip_address(match.group())
-            if ip.version == 4:
-                ips.add(str(ip))
+            ips.add(str(ip))
         except ValueError:
             continue
     return ips
@@ -73,6 +73,7 @@ def query_location(session: requests.Session, ip: str) -> str:
     """Query country code for an IP via ipinfo.io, return 'XX' on failure."""
     try:
         resp = session.get(LOCATION_URL.format(ip=ip), timeout=10)
+        resp.raise_for_status()
         return resp.text.strip()
     except requests.RequestException:
         return 'XX'
@@ -97,14 +98,23 @@ def collect_ips(session: requests.Session) -> set[str]:
     return all_ips
 
 
-def enrich_locations(session: requests.Session, ips: set[str]) -> dict[str, str]:
+def _fetch_location(ip: str) -> tuple[str, str]:
+    """Query location for a single IP with its own session."""
+    sess = _session()
+    try:
+        return ip, query_location(sess, ip)
+    finally:
+        sess.close()
+
+
+def enrich_locations(ips: set[str]) -> dict[str, str]:
     """Query geographic locations for all IPs concurrently."""
     entries: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=15) as pool:
-        fut_map = {pool.submit(query_location, session, ip): ip for ip in ips}
+        fut_map = {pool.submit(_fetch_location, ip): ip for ip in ips}
         for future in as_completed(fut_map):
-            ip = fut_map[future]
-            entries[f'{ip}:{PORT}'] = future.result()
+            ip, location = future.result()
+            entries[f'{ip}:{PORT}'] = location
     return entries
 
 
@@ -121,7 +131,7 @@ def main() -> int:
     print(f'\n{len(all_ips)} unique IPv4')
 
     print('Querying locations...')
-    entries = enrich_locations(session, all_ips)
+    entries = enrich_locations(all_ips)
 
     tmp = OUTPUT_FILE.with_suffix('.tmp')
     timestamp = beijing_timestamp()
