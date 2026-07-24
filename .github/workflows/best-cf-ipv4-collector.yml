@@ -32,8 +32,8 @@ jobs:
 
       - name: Commit update
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Lancelot"
+          git config user.email "Lancelot@example.com"
           git add best-cf-ipv4.txt
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "Update Best CF IPV4 list $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M')"
